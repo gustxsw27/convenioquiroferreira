@@ -2999,70 +2999,77 @@ app.delete("/api/medical-records/:id", authenticate, authorize(["professional"])
 });
 
 // Generate medical record document
-app.post("/api/medical-records/generate-document", authenticate, authorize(["professional"]), async (req, res) => {
+app.post('/api/medical-records/generate-document', authenticate, authorize(['professional']), async (req, res) => {
   try {
     const { record_id, template_data } = req.body;
+    const professionalId = req.user.id;
 
-    if (!record_id || !template_data) {
-      return res.status(400).json({
-        message: "ID do prontuário e dados do template são obrigatórios",
-      });
-    }
-
-    // Validate record belongs to professional
-    const recordResult = await pool.query(
-      `
+    // Get medical record with patient info
+    const recordQuery = await pool.query(`
       SELECT mr.*, pp.name as patient_name, pp.cpf as patient_cpf
       FROM medical_records mr
       JOIN private_patients pp ON mr.private_patient_id = pp.id
       WHERE mr.id = $1 AND mr.professional_id = $2
-    `,
-      [record_id, req.user.id]
-    );
+    `, [record_id, professionalId]);
 
-    if (recordResult.rows.length === 0) {
-      return res.status(404).json({ message: "Prontuário não encontrado" });
+    if (recordQuery.rows.length === 0) {
+      return res.status(404).json({ message: 'Prontuário não encontrado' });
     }
 
-    const record = recordResult.rows[0];
+    const record = recordQuery.rows[0];
 
-    // Generate document
-    const documentData = await generateDocumentPDF("medical_record", {
+    // Enhance template data with record and patient info
+    const enhancedTemplateData = {
       ...template_data,
       patientName: record.patient_name,
-      patientCpf: record.patient_cpf,
-      ...record,
+      patientCpf: record.patient_cpf || '',
+      date: record.created_at,
+      chief_complaint: record.chief_complaint,
+      history_present_illness: record.history_present_illness,
+      past_medical_history: record.past_medical_history,
+      medications: record.medications,
+      allergies: record.allergies,
+      physical_examination: record.physical_examination,
+      diagnosis: record.diagnosis,
+      treatment_plan: record.treatment_plan,
+      notes: record.notes,
+      vital_signs: record.vital_signs
+    };
+
+    console.log('🔄 Generating medical record document:', {
+      record_id,
+      enhancedTemplateData,
+      professionalId
     });
 
+    // Generate document
+    const documentResult = await generateDocumentPDF('medical_record', enhancedTemplateData, professionalId);
+
     // Save document reference
-    const documentResult = await pool.query(
-      `
-      INSERT INTO medical_documents (
+    const documentSaveResult = await pool.query(
+      `INSERT INTO medical_documents (
         professional_id, private_patient_id, title, document_type, document_url, template_data
-      )
-      VALUES ($1, $2, $3, $4, $5, $6)
-      RETURNING *
-    `,
+      ) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
       [
-        req.user.id,
+        professionalId,
         record.private_patient_id,
         `Prontuário - ${record.patient_name}`,
-        "medical_record",
-        documentData.url,
-        JSON.stringify(template_data),
+        'medical_record',
+        documentResult.url,
+        JSON.stringify(enhancedTemplateData)
       ]
     );
 
-    console.log("✅ Medical record document generated:", documentResult.rows[0].id);
+    console.log('✅ Medical record document generated:', documentSaveResult.rows[0].id);
 
     res.json({
-      message: "Documento gerado com sucesso",
-      documentUrl: documentData.url,
-      document: documentResult.rows[0],
+      message: 'Documento gerado com sucesso',
+      documentUrl: documentResult.url,
+      document: documentSaveResult.rows[0]
     });
   } catch (error) {
-    console.error("❌ Error generating medical record document:", error);
-    res.status(500).json({ message: "Erro ao gerar documento do prontuário" });
+    console.error('❌ Error generating medical record document:', error);
+    res.status(500).json({ message: 'Erro ao gerar documento do prontuário' });
   }
 });
 
@@ -3106,32 +3113,34 @@ app.post("/api/documents/medical", authenticate, authorize(["professional"]), as
     const { title, document_type, private_patient_id, template_data } = req.body;
     const professionalId = req.user.id;
 
-    // Get patient data
-    const patientQuery = await pool.query(
-      'SELECT name, cpf FROM private_patients WHERE id = $1 AND professional_id = $2',
-      [private_patient_id, professionalId]
-    );
-
-    if (patientQuery.rows.length === 0) {
-      return res.status(404).json({ message: 'Paciente não encontrado' });
-    }
-
-    const patient = patientQuery.rows[0];
-
-    // Enhance template data with patient info
-    const enhancedTemplateData = {
-      ...template_data,
-      patientName: patient.name,
-      patientCpf: patient.cpf || ''
-    };
-
     console.log("🔄 Creating medical document:", {
       title,
       document_type,
       private_patient_id,
-      enhancedTemplateData,
       professional_id: professionalId,
     });
+
+    // Validate required fields
+    if (!title || !document_type || !private_patient_id) {
+      console.log("❌ Missing required fields");
+      return res
+        .status(400)
+        .json({ message: "Título, tipo e paciente são obrigatórios" });
+    }
+
+    // Verify patient belongs to professional
+    const patientCheck = await pool.query(
+      "SELECT id, name, cpf FROM private_patients WHERE id = $1 AND professional_id = $2",
+      [private_patient_id, professionalId]
+    );
+
+    if (patientCheck.rows.length === 0) {
+      console.log("❌ Patient not found or not owned by professional");
+      return res.status(404).json({ message: "Paciente não encontrado" });
+    }
+
+    const patient = patientCheck.rows[0];
+    console.log("✅ Patient verified:", patient.name);
 
     // Generate document using the document generator
     try {
@@ -3139,12 +3148,12 @@ app.post("/api/documents/medical", authenticate, authorize(["professional"]), as
 
       // Prepare complete template data
       const completeTemplateData = {
-        ...enhancedTemplateData,
+        ...template_data,
         patientName: patient.name,
         patientCpf: patient.cpf || "",
-        professionalName: enhancedTemplateData.professionalName || req.user.name,
-        professionalSpecialty: enhancedTemplateData.professionalSpecialty || "",
-        crm: enhancedTemplateData.crm || "",
+        professionalName: template_data.professionalName || req.user.name,
+        professionalSpecialty: template_data.professionalSpecialty || "",
+        crm: template_data.crm || "",
       };
 
       console.log("🔄 Generating document with data:", completeTemplateData);
