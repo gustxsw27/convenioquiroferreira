@@ -1370,7 +1370,7 @@ const SchedulingPageWithExtras: React.FC = () => {
                   ].map((status) => (
                     <label
                       key={status.value}
-                      className={\`flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all ${
+                      className={`flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all ${
                         newStatus === status.value
                           ? `border-${status.color}-300 bg-${status.color}-50`
                           : "border-gray-200 hover:bg-gray-50"
