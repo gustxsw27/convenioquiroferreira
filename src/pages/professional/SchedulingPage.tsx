@@ -642,6 +642,63 @@ const SchedulingPageWithExtras: React.FC = () => {
         </div>
       )}
 
+      {/* Settings Panel */}
+      {showSettings && (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+          <div className="flex items-center mb-4">
+            <Settings className="h-6 w-6 text-red-600 mr-2" />
+            <h2 className="text-xl font-semibold">Configurações da Agenda</h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Duração dos Slots de Tempo
+              </label>
+              <div className="space-y-2">
+                {[
+                  { value: 15, label: "15 minutos", description: "Consultas rápidas" },
+                  { value: 30, label: "30 minutos", description: "Duração padrão" },
+                  { value: 60, label: "1 hora", description: "Consultas longas" },
+                ].map((option) => (
+                  <label
+                    key={option.value}
+                    className={`flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all ${
+                      slotDuration === option.value
+                        ? "border-red-300 bg-red-50"
+                        : "border-gray-200 hover:bg-gray-50"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="slotDuration"
+                      value={option.value}
+                      checked={slotDuration === option.value}
+                      onChange={(e) => setSlotDuration(parseInt(e.target.value))}
+                      className="text-red-600 focus:ring-red-500"
+                    />
+                    <div className="ml-3">
+                      <div className="font-medium text-gray-900">{option.label}</div>
+                      <div className="text-sm text-gray-500">{option.description}</div>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+              <h3 className="font-medium text-blue-900 mb-2">Informações</h3>
+              <ul className="text-sm text-blue-700 space-y-1">
+                <li>• Horário de funcionamento: 8h às 18h</li>
+                <li>• Slots atuais: {slotDuration} minutos cada</li>
+                <li>• Total de slots disponíveis: {timeSlots.length}</li>
+                <li>• A alteração afeta apenas a visualização</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Date Navigation */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
         <div className="flex items-center justify-between">
