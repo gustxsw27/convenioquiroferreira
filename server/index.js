@@ -3106,34 +3106,32 @@ app.post("/api/documents/medical", authenticate, authorize(["professional"]), as
     const { title, document_type, private_patient_id, template_data } = req.body;
     const professionalId = req.user.id;
 
+    // Get patient data
+    const patientQuery = await pool.query(
+      'SELECT name, cpf FROM private_patients WHERE id = $1 AND professional_id = $2',
+      [private_patient_id, professionalId]
+    );
+
+    if (patientQuery.rows.length === 0) {
+      return res.status(404).json({ message: 'Paciente não encontrado' });
+    }
+
+    const patient = patientQuery.rows[0];
+
+    // Enhance template data with patient info
+    const enhancedTemplateData = {
+      ...template_data,
+      patientName: patient.name,
+      patientCpf: patient.cpf || ''
+    };
+
     console.log("🔄 Creating medical document:", {
       title,
       document_type,
       private_patient_id,
+      enhancedTemplateData,
       professional_id: professionalId,
     });
-
-    // Validate required fields
-    if (!title || !document_type || !private_patient_id) {
-      console.log("❌ Missing required fields");
-      return res
-        .status(400)
-        .json({ message: "Título, tipo e paciente são obrigatórios" });
-    }
-
-    // Verify patient belongs to professional
-    const patientCheck = await pool.query(
-      "SELECT id, name, cpf FROM private_patients WHERE id = $1 AND professional_id = $2",
-      [private_patient_id, professionalId]
-    );
-
-    if (patientCheck.rows.length === 0) {
-      console.log("❌ Patient not found or not owned by professional");
-      return res.status(404).json({ message: "Paciente não encontrado" });
-    }
-
-    const patient = patientCheck.rows[0];
-    console.log("✅ Patient verified:", patient.name);
 
     // Generate document using the document generator
     try {
@@ -3141,12 +3139,12 @@ app.post("/api/documents/medical", authenticate, authorize(["professional"]), as
 
       // Prepare complete template data
       const completeTemplateData = {
-        ...template_data,
+        ...enhancedTemplateData,
         patientName: patient.name,
         patientCpf: patient.cpf || "",
-        professionalName: template_data.professionalName || req.user.name,
-        professionalSpecialty: template_data.professionalSpecialty || "",
-        crm: template_data.crm || "",
+        professionalName: enhancedTemplateData.professionalName || req.user.name,
+        professionalSpecialty: enhancedTemplateData.professionalSpecialty || "",
+        crm: enhancedTemplateData.crm || "",
       };
 
       console.log("🔄 Generating document with data:", completeTemplateData);

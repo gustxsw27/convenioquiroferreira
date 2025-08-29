@@ -900,6 +900,22 @@ const DocumentsPage: React.FC = () => {
 
                 {/* Dynamic form fields based on document type */}
                 {renderFormFields()}
+
+                {/* Professional Signature Preview */}
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <h4 className="font-medium text-blue-900 mb-2 flex items-center">
+                    <FileText className="h-4 w-4 mr-2" />
+                    Assinatura Digital (Automática)
+                  </h4>
+                  <div className="text-sm text-blue-800 space-y-1">
+                    <p><strong>Profissional:</strong> {user?.name || 'Carregando...'}</p>
+                    <p><strong>Especialidade:</strong> Será carregada automaticamente do seu perfil</p>
+                    <p><strong>Registro:</strong> Será carregado automaticamente do seu perfil</p>
+                  </div>
+                  <p className="text-xs text-blue-600 mt-2">
+                    ℹ️ Essas informações são preenchidas automaticamente com base no seu perfil profissional
+                  </p>
+                </div>
               </div>
 
               <div className="flex justify-end space-x-3 mt-8 pt-6 border-t border-gray-200">
