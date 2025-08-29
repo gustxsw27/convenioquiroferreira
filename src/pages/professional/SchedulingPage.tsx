@@ -27,7 +27,6 @@ type Consultation = {
   client_name: string;
   service_name: string;
   status: 'scheduled' | 'confirmed' | 'completed' | 'cancelled';
-  value: number;
   notes?: string;
   is_dependent: boolean;
   patient_type: 'convenio' | 'private';
@@ -431,12 +430,6 @@ const SchedulingPage: React.FC = () => {
     return numericValue.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
   };
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(value);
-  };
 
   const formatTime = (time: string) => {
     return time;
@@ -792,9 +785,6 @@ const SchedulingPage: React.FC = () => {
                     Status
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Valor
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Local
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -852,11 +842,6 @@ const SchedulingPage: React.FC = () => {
                         <span className={`px-2 py-1 text-xs font-medium rounded-full ${statusInfo.className}`}>
                           {statusInfo.text}
                         </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
-                          {formatCurrency(consultation.value)}
-                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-600">
