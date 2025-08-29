@@ -1408,9 +1408,10 @@ const SchedulingPageWithExtras: React.FC = () => {
                 </button>
                 <button
                   onClick={updateConsultationStatus}
-                  className={\`btn btn-primary ${
-                    isUpdatingStatus ? "opacity-70 cursor-not-allowed" : ""
-                  }`}
+                  className={
+                    "btn btn-primary " +
+                    (isUpdatingStatus ? "opacity-70 cursor-not-allowed" : "")
+                  }
                   disabled={isUpdatingStatus || newStatus === selectedConsultation.status}
                 >
                   {isUpdatingStatus ? (
