@@ -17,6 +17,9 @@ import {
   Edit,
   MessageCircle,
   Repeat,
+  Settings,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { format, addDays, subDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -57,6 +60,8 @@ type PrivatePatient = {
 
 const SchedulingPageWithExtras: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [slotDuration, setSlotDuration] = useState(30); // 15, 30, or 60 minutes
+  const [showSettings, setShowSettings] = useState(false);
   const [slotDuration, setSlotDuration] = useState(30); // 15, 30, or 60 minutes
   const [showSettings, setShowSettings] = useState(false);
   const [consultations, setConsultations] = useState<Consultation[]>([]);
@@ -571,6 +576,9 @@ const SchedulingPageWithExtras: React.FC = () => {
     const slots = [];
     for (let hour = 8; hour < 18; hour++) {
       for (let minute = 0; minute < 60; minute += slotDuration) {
+        // Don't create slots that would go past 18:00
+        if (hour === 18 && minute > 0) break;
+        
         const timeStr = `${hour.toString().padStart(2, "0")}:${minute
           .toString()
           .padStart(2, "0")}`;
