@@ -758,7 +758,10 @@ const SchedulingPageWithExtras: React.FC = () => {
                 {timeSlots.map((timeSlot) => (
                   <div
                     key={timeSlot}
-                    className="h-20 flex items-center justify-center border-b border-gray-100 text-sm font-medium text-gray-700"
+                    className={`${
+                      slotDuration === 15 ? 'h-12' : 
+                      slotDuration === 30 ? 'h-16' : 'h-24'
+                    } flex items-center justify-center border-b border-gray-100 text-sm font-medium text-gray-700`}
                   >
                     {timeSlot}
                   </div>
@@ -779,14 +782,29 @@ const SchedulingPageWithExtras: React.FC = () => {
                     <div
                       key={timeSlot}
                       className={`${
+                        slotDuration === 15 ? 'h-12' : 
+                        slotDuration === 30 ? 'h-16' : 'h-24'
+                      } border-b border-gray-100 flex items-center px-4 hover:bg-gray-50 transition-colors cursor-pointer`}
+                      onClick={() => {
+                        if (!consultation) {
+                          // Auto-fill time when clicking on empty slot
+                          setFormData(prev => ({ 
+                            ...prev, 
+                            time: timeSlot,
+                            date: format(selectedDate, "yyyy-MM-dd")
+                          }));
+                          setShowNewModal(true);
+                        }
+                      }}
+                      title={!consultation ? `Agendar consulta para ${timeSlot}` : ''}
                         slotDuration === 15 ? 'h-12' : slotDuration === 30 ? 'h-16' : 'h-24'
                       } border-b border-gray-100 flex items-center px-4 hover:bg-gray-50 transition-colors`}
                     >
                       {consultation ? (
                         <div className="flex items-center justify-between w-full">
-                          <div className="flex items-center space-x-3 flex-1">
+                          <div className="flex items-center space-x-2 flex-1">
                             <div className="flex-1">
-                              <div className="flex items-center mb-1">
+                              <div className={`flex items-center ${slotDuration === 15 ? 'mb-0' : 'mb-1'}`}>
                                 {consultation.is_dependent ? (
                                   <Users className="h-4 w-4 text-blue-600 mr-2" />
                                 ) : consultation.patient_type === "private" ? (
@@ -797,44 +815,67 @@ const SchedulingPageWithExtras: React.FC = () => {
                                 <span className={`font-medium text-gray-900 ${
                                   slotDuration === 15 ? 'text-xs' : 'text-sm'
                                 }`}>
+                                  slotDuration === 15 ? 'text-xs' : 'text-sm'
+                                }`}>
                                   {consultation.client_name}
                                 </span>
                                 {consultation.is_dependent && (
-                                  <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                                  <span className={`ml-1 px-1 py-0.5 bg-blue-100 text-blue-800 rounded-full ${
+                                    slotDuration === 15 ? 'text-xs' : 'text-xs'
+                                  }`}>
                                     Dependente
                                   </span>
                                 )}
                                 {consultation.patient_type === "private" && (
-                                  <span className="ml-2 px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs">
+                                  <span className={`ml-1 px-1 py-0.5 bg-purple-100 text-purple-800 rounded-full ${
+                                    slotDuration === 15 ? 'text-xs' : 'text-xs'
+                                  }`}>
                                     Particular
                                   </span>
                                 )}
                                 
                                 {/* WhatsApp Button */}
-                                <button
-                                  onClick={() => openWhatsApp(consultation)}
-                                  className="ml-2 p-1 text-green-600 hover:text-green-800 hover:bg-green-50 rounded transition-colors"
-                                  title="Enviar mensagem no WhatsApp"
-                                >
-                                  <MessageCircle className="h-4 w-4" />
-                                </button>
+                                {slotDuration !== 15 && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      openWhatsApp(consultation);
+                                    }}
+                                    className="ml-2 p-1 text-green-600 hover:text-green-800 hover:bg-green-50 rounded transition-colors"
+                                    title="Enviar mensagem no WhatsApp"
+                                  >
+                                    <MessageCircle className="h-4 w-4" />
+                                  </button>
+                                )}
                               </div>
                               <div className={`flex items-center space-x-2 ${
                                 slotDuration === 15 ? 'flex-col items-start space-x-0 space-y-1' : 'space-x-4'
-                              }`}>
-                                <p className="text-xs text-gray-600">
-                                  {consultation.service_name}
-                                </p>
-                                <p className="text-xs font-medium text-green-600">
-                                  {formatCurrency(consultation.value)}
-                                </p>
-                                {consultation.location_name && (
-                                  <p className="text-xs text-gray-500">
-                                    {consultation.location_name}
+                              {slotDuration !== 15 && (
+                                <div className="flex items-center space-x-4">
+                                  <p className="text-xs text-gray-600">
+                                    {consultation.service_name}
                                   </p>
-                                )}
-                              </div>
-                              {consultation.notes && slotDuration >= 30 && (
+                                  <p className="text-xs font-medium text-green-600">
+                                    {formatCurrency(consultation.value)}
+                                  </p>
+                                  {consultation.location_name && (
+                                    <p className="text-xs text-gray-500">
+                                      {consultation.location_name}
+                                    </p>
+                                  )}
+                                </div>
+                              )}
+                              {slotDuration === 15 && (
+                                <div className="flex items-center space-x-2">
+                                  <p className="text-xs text-gray-500">
+                                    {consultation.service_name}
+                                  </p>
+                                  <p className="text-xs font-medium text-green-600">
+                                    {formatCurrency(consultation.value)}
+                                  </p>
+                                </div>
+                              )}
+                              {consultation.notes && slotDuration !== 15 && (
                                 <p className="text-xs text-gray-500 mt-1 italic truncate">
                                   "{consultation.notes}"
                                 </p>
@@ -846,7 +887,10 @@ const SchedulingPageWithExtras: React.FC = () => {
                           <div className="flex items-center space-x-2">
                             {/* Edit Button */}
                             <button
-                              onClick={() => openEditModal(consultation)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openEditModal(consultation);
+                              }}
                               className={`${
                                 slotDuration === 15 ? 'p-0.5' : 'p-1'
                               } text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded transition-colors`}
@@ -857,8 +901,13 @@ const SchedulingPageWithExtras: React.FC = () => {
 
                             {/* Status Button */}
                             <button
-                              onClick={() => openStatusModal(consultation)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openStatusModal(consultation);
+                              }}
                               className={`${
+                                slotDuration === 15 ? 'px-1 py-0.5' : 'px-2 py-1'
+                              } rounded text-xs font-medium flex items-center border transition-all hover:shadow-sm ${
                                 slotDuration === 15 ? 'px-1 py-0.5' : 'px-2 py-1'
                               } rounded text-xs font-medium flex items-center border transition-all hover:shadow-sm ${
                                 getStatusInfo(consultation.status).className
@@ -871,7 +920,9 @@ const SchedulingPageWithExtras: React.FC = () => {
                           </div>
                         </div>
                       ) : (
-                        <button
+                        <div className="text-xs text-gray-400 italic hover:text-gray-600 transition-colors">
+                          Clique para agendar • {timeSlot}
+                        </div>
                           onClick={() => {
                             setFormData(prev => ({
                               ...prev,
@@ -907,6 +958,9 @@ const SchedulingPageWithExtras: React.FC = () => {
               <span className="text-sm">
                 Configuração atual: slots de {slotDuration} minutos
               </span>
+            </p>
+            <p className="text-sm text-gray-500 mb-4">
+              Slots configurados para {slotDuration} minutos • {timeSlots.length} horários disponíveis
             </p>
             <button
               onClick={() => setShowNewModal(true)}
