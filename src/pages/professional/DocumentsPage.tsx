@@ -901,51 +901,34 @@ const DocumentsPage: React.FC = () => {
                 {/* Dynamic form fields based on document type */}
                 {renderFormFields()}
 
-                {/* Professional Signature Preview */}
-                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                  <h4 className="font-medium text-blue-900 mb-2 flex items-center">
-                    <FileText className="h-4 w-4 mr-2" />
-                    Assinatura Digital (Automática)
-                  </h4>
-                  <div className="text-sm text-blue-800 space-y-1">
-                    <p><strong>Profissional:</strong> {user?.name || 'Carregando...'}</p>
-                    <p><strong>Especialidade:</strong> Será carregada automaticamente do seu perfil</p>
-                    <p><strong>Registro:</strong> Será carregado automaticamente do seu perfil</p>
-                  </div>
-                  <p className="text-xs text-blue-600 mt-2">
-                    ℹ️ Essas informações são preenchidas automaticamente com base no seu perfil profissional
-                  </p>
+                {/* Submit buttons */}
+                <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+                  <button
+                    type="button"
+                    onClick={closeModal}
+                    className="btn btn-secondary"
+                    disabled={isCreating}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={isCreating}
+                  >
+                    {isCreating ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Criando...
+                      </>
+                    ) : (
+                      <>
+                        <Check className="h-4 w-4 mr-2" />
+                        Criar Documento
+                      </>
+                    )}
+                  </button>
                 </div>
-              </div>
-
-              <div className="flex justify-end space-x-3 mt-8 pt-6 border-t border-gray-200">
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className="btn btn-secondary"
-                  disabled={isCreating}
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className={`btn btn-primary ${
-                    isCreating ? "opacity-70 cursor-not-allowed" : ""
-                  }`}
-                  disabled={isCreating}
-                >
-                  {isCreating ? (
-                    <>
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                      Criando Documento...
-                    </>
-                  ) : (
-                    <>
-                      <FileText className="h-5 w-5 mr-2" />
-                      Criar Documento
-                    </>
-                  )}
-                </button>
               </div>
             </form>
           </div>
@@ -955,29 +938,38 @@ const DocumentsPage: React.FC = () => {
       {/* Delete confirmation modal */}
       {showDeleteConfirm && documentToDelete && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl w-full max-w-md p-6">
-            <h2 className="text-xl font-bold mb-4">Confirmar Exclusão</h2>
-            
-            <p className="mb-6">
-              Tem certeza que deseja excluir o documento <strong>{documentToDelete.title}</strong>?
-              Esta ação não pode ser desfeita.
-            </p>
-            
-            <div className="flex justify-end space-x-3">
-              <button
-                onClick={cancelDelete}
-                className="btn btn-secondary flex items-center"
-              >
-                <X className="h-4 w-4 mr-2" />
-                Cancelar
-              </button>
-              <button
-                onClick={deleteDocument}
-                className="btn bg-red-600 text-white hover:bg-red-700 flex items-center"
-              >
-                <Check className="h-4 w-4 mr-2" />
-                Confirmar
-              </button>
+          <div className="bg-white rounded-xl max-w-md w-full">
+            <div className="p-6">
+              <div className="flex items-center mb-4">
+                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                  <AlertCircle className="h-6 w-6 text-red-600" />
+                </div>
+                <div className="ml-4">
+                  <h3 className="text-lg font-medium text-gray-900">
+                    Confirmar Exclusão
+                  </h3>
+                </div>
+              </div>
+              
+              <p className="text-gray-600 mb-6">
+                Tem certeza que deseja excluir o documento "{documentToDelete.title}"? 
+                Esta ação não pode ser desfeita.
+              </p>
+              
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={cancelDelete}
+                  className="btn btn-secondary"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={deleteDocument}
+                  className="btn bg-red-600 hover:bg-red-700 text-white"
+                >
+                  Excluir
+                </button>
+              </div>
             </div>
           </div>
         </div>
