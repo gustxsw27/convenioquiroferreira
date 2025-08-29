@@ -62,8 +62,6 @@ const SchedulingPageWithExtras: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [slotDuration, setSlotDuration] = useState(30); // 15, 30, or 60 minutes
   const [showSettings, setShowSettings] = useState(false);
-  const [slotDuration, setSlotDuration] = useState(30); // 15, 30, or 60 minutes
-  const [showSettings, setShowSettings] = useState(false);
   const [consultations, setConsultations] = useState<Consultation[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [privatePatients, setPrivatePatients] = useState<PrivatePatient[]>([]);
@@ -797,8 +795,6 @@ const SchedulingPageWithExtras: React.FC = () => {
                         }
                       }}
                       title={!consultation ? `Agendar consulta para ${timeSlot}` : ''}
-                        slotDuration === 15 ? 'h-12' : slotDuration === 30 ? 'h-16' : 'h-24'
-                      } border-b border-gray-100 flex items-center px-4 hover:bg-gray-50 transition-colors`}
                     >
                       {consultation ? (
                         <div className="flex items-center justify-between w-full">
@@ -813,8 +809,6 @@ const SchedulingPageWithExtras: React.FC = () => {
                                   <User className="h-4 w-4 text-green-600 mr-2" />
                                 )}
                                 <span className={`font-medium text-gray-900 ${
-                                  slotDuration === 15 ? 'text-xs' : 'text-sm'
-                                }`}>
                                   slotDuration === 15 ? 'text-xs' : 'text-sm'
                                 }`}>
                                   {consultation.client_name}
@@ -850,6 +844,7 @@ const SchedulingPageWithExtras: React.FC = () => {
                               </div>
                               <div className={`flex items-center space-x-2 ${
                                 slotDuration === 15 ? 'flex-col items-start space-x-0 space-y-1' : 'space-x-4'
+                              }`}>
                               {slotDuration !== 15 && (
                                 <div className="flex items-center space-x-4">
                                   <p className="text-xs text-gray-600">
@@ -880,6 +875,7 @@ const SchedulingPageWithExtras: React.FC = () => {
                                   "{consultation.notes}"
                                 </p>
                               )}
+                              </div>
                             </div>
                           </div>
 
@@ -908,8 +904,6 @@ const SchedulingPageWithExtras: React.FC = () => {
                               className={`${
                                 slotDuration === 15 ? 'px-1 py-0.5' : 'px-2 py-1'
                               } rounded text-xs font-medium flex items-center border transition-all hover:shadow-sm ${
-                                slotDuration === 15 ? 'px-1 py-0.5' : 'px-2 py-1'
-                              } rounded text-xs font-medium flex items-center border transition-all hover:shadow-sm ${
                                 getStatusInfo(consultation.status).className
                               }`}
                               title="Clique para alterar o status"
@@ -923,19 +917,6 @@ const SchedulingPageWithExtras: React.FC = () => {
                         <div className="text-xs text-gray-400 italic hover:text-gray-600 transition-colors">
                           Clique para agendar • {timeSlot}
                         </div>
-                          onClick={() => {
-                            setFormData(prev => ({
-                              ...prev,
-                              date: format(selectedDate, "yyyy-MM-dd"),
-                              time: timeSlot
-                            }));
-                            setShowNewModal(true);
-                          }}
-                          className="w-full h-full text-left px-2 text-xs text-gray-400 italic hover:bg-blue-50 hover:text-blue-600 transition-colors rounded"
-                          title={`Agendar consulta às ${timeSlot}`}
-                        >
-                          Horário livre - Clique para agendar
-                        </button>
                       )}
                     </div>
                   );
@@ -1389,7 +1370,7 @@ const SchedulingPageWithExtras: React.FC = () => {
                   ].map((status) => (
                     <label
                       key={status.value}
-                      className={`flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all ${
+                      className={\`flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all ${
                         newStatus === status.value
                           ? `border-${status.color}-300 bg-${status.color}-50`
                           : "border-gray-200 hover:bg-gray-50"
@@ -1401,10 +1382,10 @@ const SchedulingPageWithExtras: React.FC = () => {
                         value={status.value}
                         checked={newStatus === status.value}
                         onChange={(e) => setNewStatus(e.target.value as any)}
-                        className={`text-${status.color}-600 focus:ring-${status.color}-500`}
+                        className={\`text-${status.color}-600 focus:ring-${status.color}-500`}
                       />
                       <div className="ml-3 flex items-center">
-                        <div className={`text-${status.color}-600 mr-2`}>
+                        <div className={\`text-${status.color}-600 mr-2`}>
                           {status.icon}
                         </div>
                         <div>
@@ -1427,7 +1408,7 @@ const SchedulingPageWithExtras: React.FC = () => {
                 </button>
                 <button
                   onClick={updateConsultationStatus}
-                  className={`btn btn-primary ${
+                  className={\`btn btn-primary ${
                     isUpdatingStatus ? "opacity-70 cursor-not-allowed" : ""
                   }`}
                   disabled={isUpdatingStatus || newStatus === selectedConsultation.status}
