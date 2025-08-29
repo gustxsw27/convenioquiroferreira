@@ -1382,10 +1382,10 @@ const SchedulingPageWithExtras: React.FC = () => {
                         value={status.value}
                         checked={newStatus === status.value}
                         onChange={(e) => setNewStatus(e.target.value as any)}
-                        className={\`text-${status.color}-600 focus:ring-${status.color}-500`}
+                        className={"text-" + status.color + "-600 focus:ring-" + status.color + "-500"}
                       />
                       <div className="ml-3 flex items-center">
-                        <div className={\`text-${status.color}-600 mr-2`}>
+                        <div className={"text-" + status.color + "-600 mr-2"}>
                           {status.icon}
                         </div>
                         <div>
