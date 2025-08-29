@@ -57,6 +57,8 @@ type PrivatePatient = {
 
 const SchedulingPageWithExtras: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [slotDuration, setSlotDuration] = useState(30); // 15, 30, or 60 minutes
+  const [showSettings, setShowSettings] = useState(false);
   const [consultations, setConsultations] = useState<Consultation[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [privatePatients, setPrivatePatients] = useState<PrivatePatient[]>([]);
@@ -567,8 +569,8 @@ const SchedulingPageWithExtras: React.FC = () => {
 
   const generateTimeSlots = () => {
     const slots = [];
-    for (let hour = 8; hour <= 18; hour++) {
-      for (let minute = 0; minute < 60; minute += 30) {
+    for (let hour = 8; hour < 18; hour++) {
+      for (let minute = 0; minute < 60; minute += slotDuration) {
         const timeStr = `${hour.toString().padStart(2, "0")}:${minute
           .toString()
           .padStart(2, "0")}`;

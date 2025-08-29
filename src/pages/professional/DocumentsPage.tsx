@@ -69,9 +69,6 @@ const DocumentsPage: React.FC = () => {
     risks: "",
     prescription: "",
     content: "",
-    professionalName: user?.name || "",
-    professionalSpecialty: "",
-    crm: "",
   });
 
   // Get API URL
@@ -216,9 +213,6 @@ const DocumentsPage: React.FC = () => {
       risks: "",
       prescription: "",
       content: "",
-      professionalName: user?.name || "",
-      professionalSpecialty: "",
-      crm: "",
     });
     setError('');
     setSuccess('');
@@ -252,11 +246,6 @@ const DocumentsPage: React.FC = () => {
       return;
     }
 
-    if (!formData.professionalName.trim()) {
-      setError('Nome do profissional é obrigatório');
-      setIsCreating(false);
-      return;
-    }
 
     // Validate specific fields based on document type
     if (formData.document_type === 'certificate') {
@@ -855,47 +844,16 @@ const DocumentsPage: React.FC = () => {
                 </div>
 
                 {/* Professional Information */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Nome do Profissional *
-                    </label>
-                    <input
-                      type="text"
-                      name="professionalName"
-                      value={formData.professionalName}
-                      onChange={handleInputChange}
-                      className="input"
-                      required
-                    />
+                {/* Professional Signature Info */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex items-center mb-2">
+                    <User className="h-5 w-5 text-blue-600 mr-2" />
+                    <h3 className="font-medium text-blue-900">Assinatura Digital Automática</h3>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Especialidade
-                    </label>
-                    <input
-                      type="text"
-                      name="professionalSpecialty"
-                      value={formData.professionalSpecialty}
-                      onChange={handleInputChange}
-                      className="input"
-                      placeholder="Ex: Fisioterapeuta"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      CRM/Registro *
-                    </label>
-                    <input
-                      type="text"
-                      name="crm"
-                      value={formData.crm}
-                      onChange={handleInputChange}
-                      className="input"
-                      placeholder="Ex: 12345/GO"
-                      required
-                    />
-                  </div>
+                  <p className="text-sm text-blue-700">
+                    A assinatura do documento será preenchida automaticamente com seus dados do perfil:
+                    nome, área de atuação e código profissional.
+                  </p>
                 </div>
 
                 {/* Dynamic form fields based on document type */}
