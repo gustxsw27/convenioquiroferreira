@@ -93,11 +93,11 @@ const SchedulingPage: React.FC = () => {
   const [consultationToEdit, setConsultationToEdit] = useState<Consultation | null>(null);
 
   // Slot customization
-  const [slotDuration, setSlotDuration] = useState<SlotDuration>(() => {
+  const [slotDuration2, setSlotDuration2] = useState<SlotDuration>(() => {
     const saved = localStorage.getItem('scheduling-slot-duration');
     return (saved ? parseInt(saved) : 30) as SlotDuration;
   });
-  const [showSlotModal, setShowSlotModal] = useState(false);
+  const [showSlotModal2, setShowSlotModal2] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -517,8 +517,8 @@ const SchedulingPage: React.FC = () => {
     }
   };
 
-  const handleSlotDurationChange = (duration: SlotDuration) => {
-    setSlotDuration(duration);
+  const handleSlotDurationChange2 = (duration: SlotDuration) => {
+    setSlotDuration2(duration);
     localStorage.setItem('scheduling-slot-duration', duration.toString());
   };
 
@@ -788,8 +788,6 @@ const SchedulingPage: React.FC = () => {
                       slotDuration === 30 ? 'h-20' : 
                       'h-32'
                     } flex items-center justify-center border-b border-gray-100 text-sm font-medium text-gray-700`}
-                      slotDuration === 15 ? 'h-12' : slotDuration === 30 ? 'h-20' : 'h-32'
-                    } flex items-center justify-center border-b border-gray-100 text-sm font-medium text-gray-700`}
                   >
                     {timeSlot}
                   </div>
@@ -813,8 +811,6 @@ const SchedulingPage: React.FC = () => {
                         slotDuration === 15 ? 'h-12' : 
                         slotDuration === 30 ? 'h-20' : 
                         'h-32'
-                      } border-b border-gray-100 flex items-center px-4 hover:bg-gray-50 transition-colors`}
-                        slotDuration === 15 ? 'h-12' : slotDuration === 30 ? 'h-20' : 'h-32'
                       } border-b border-gray-100 flex items-center px-4 hover:bg-gray-50 transition-colors`}
                     >
                       {consultation ? (
@@ -1424,10 +1420,10 @@ const SchedulingPage: React.FC = () => {
 
       {/* Slot Customization Modal */}
       <SlotCustomizationModal
-        isOpen={showSlotModal}
-        currentSlotDuration={slotDuration}
-        onClose={() => setShowSlotModal(false)}
-        onSlotDurationChange={handleSlotDurationChange}
+        isOpen={showSlotModal2}
+        currentSlotDuration={slotDuration2}
+        onClose={() => setShowSlotModal2(false)}
+        onSlotDurationChange={handleSlotDurationChange2}
       />
     </div>
   );
