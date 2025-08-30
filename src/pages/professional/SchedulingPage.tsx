@@ -16,13 +16,13 @@ import {
   DollarSign,
   Edit,
   MessageCircle,
-  Repeat,
+  Settings,
   Settings,
 } from "lucide-react";
 import { format, addDays, subDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import EditConsultationModal from "../../components/EditConsultationModal";
-import RecurringConsultationModal from "../../components/RecurringConsultationModal";
+import SlotCustomizationModal from "../../components/SlotCustomizationModal";
 import SlotCustomizationModal from "../../components/SlotCustomizationModal";
 
 type Consultation = {
@@ -59,6 +59,8 @@ type PrivatePatient = {
 
 type SlotDuration = 15 | 30 | 60;
 
+type SlotDuration = 15 | 30 | 60;
+
 const SchedulingPage: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [consultations, setConsultations] = useState<Consultation[]>([]);
@@ -90,8 +92,12 @@ const SchedulingPage: React.FC = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [consultationToEdit, setConsultationToEdit] = useState<Consultation | null>(null);
 
-  // Recurring consultation modal
-  const [showRecurringModal, setShowRecurringModal] = useState(false);
+  // Slot customization
+  const [slotDuration, setSlotDuration] = useState<SlotDuration>(() => {
+    const saved = localStorage.getItem('scheduling-slot-duration');
+    return (saved ? parseInt(saved) : 30) as SlotDuration;
+  });
+  const [showSlotModal, setShowSlotModal] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -511,6 +517,11 @@ const SchedulingPage: React.FC = () => {
     }
   };
 
+  const handleSlotDurationChange = (duration: SlotDuration) => {
+    setSlotDuration(duration);
+    localStorage.setItem('scheduling-slot-duration', duration.toString());
+  };
+
   const formatTime = (dateString: string) => {
     // Convert UTC date to Brasília timezone for display
     const utcDate = new Date(dateString);
@@ -582,7 +593,7 @@ const SchedulingPage: React.FC = () => {
     }
   };
 
-  const generateTimeSlots = (duration: SlotDuration = slotDuration) => {
+  const generateTimeSlots = (duration: number = 30) => {
     const slots = [];
     for (let hour = 8; hour <= 18; hour++) {
       for (let minute = 0; minute < 60; minute += duration) {
@@ -610,10 +621,6 @@ const SchedulingPage: React.FC = () => {
     confirmed: consultations.filter((c) => c.status === "confirmed").length,
     completed: consultations.filter((c) => c.status === "completed").length,
     cancelled: consultations.filter((c) => c.status === "cancelled").length,
-    totalValue: consultations.reduce((sum, c) => sum + c.value, 0),
-    convenioValue: consultations
-      .filter((c) => c.patient_type === "convenio")
-      .reduce((sum, c) => sum + c.value * 0.5, 0), // Assuming 50% to pay to convenio
   };
 
   const getSlotDurationLabel = (duration: SlotDuration) => {
@@ -648,13 +655,13 @@ const SchedulingPage: React.FC = () => {
           </button>
           
           <button
-            onClick={() => setShowRecurringModal(true)}
+            onClick={() => setShowSlotModal(true)}
             className="btn btn-outline flex items-center"
           >
-            <Repeat className="h-5 w-5 mr-2" />
-            Consultas Recorrentes
+            <Settings className="h-5 w-5 mr-2" />
+            Slots ({slotDuration}min)
           </button>
-          
+
           <button
             onClick={() => setShowNewModal(true)}
             className="btn btn-primary flex items-center"
@@ -692,6 +699,9 @@ const SchedulingPage: React.FC = () => {
           <div className="text-center">
             <h2 className="text-xl font-semibold text-gray-900">
               {format(selectedDate, "EEEE, dd 'de' MMMM", { locale: ptBR })}
+              <span className="text-sm text-gray-500 ml-2">
+                (Slots de {slotDuration} min)
+              </span>
             </h2>
             <div className="flex items-center justify-center space-x-4 text-sm text-gray-600">
               <span>{consultations.length} consulta(s)</span>
@@ -720,7 +730,7 @@ const SchedulingPage: React.FC = () => {
 
       {/* Daily Statistics */}
       {consultations.length > 0 && (
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <div className="bg-blue-50 p-4 rounded-lg text-center border border-blue-200">
             <div className="text-2xl font-bold text-blue-600">{dailyStats.scheduled}</div>
             <div className="text-sm text-blue-700 flex items-center justify-center">
@@ -752,22 +762,6 @@ const SchedulingPage: React.FC = () => {
               Cancelados
             </div>
           </div>
-
-          <div className="bg-green-50 p-4 rounded-lg text-center border border-green-200">
-            <div className="text-lg font-bold text-green-600">{formatCurrency(dailyStats.totalValue)}</div>
-            <div className="text-sm text-green-700 flex items-center justify-center">
-              <DollarSign className="h-3 w-3 mr-1" />
-              Total
-            </div>
-          </div>
-
-          <div className="bg-yellow-50 p-4 rounded-lg text-center border border-yellow-200">
-            <div className="text-lg font-bold text-yellow-600">{formatCurrency(dailyStats.convenioValue)}</div>
-            <div className="text-sm text-yellow-700 flex items-center justify-center">
-              <DollarSign className="h-3 w-3 mr-1" />
-              Convênio
-            </div>
-          </div>
         </div>
       )}
 
@@ -790,6 +784,10 @@ const SchedulingPage: React.FC = () => {
                   <div
                     key={timeSlot}
                     className={`${
+                      slotDuration === 15 ? 'h-12' : 
+                      slotDuration === 30 ? 'h-20' : 
+                      'h-32'
+                    } flex items-center justify-center border-b border-gray-100 text-sm font-medium text-gray-700`}
                       slotDuration === 15 ? 'h-12' : slotDuration === 30 ? 'h-20' : 'h-32'
                     } flex items-center justify-center border-b border-gray-100 text-sm font-medium text-gray-700`}
                   >
@@ -812,6 +810,10 @@ const SchedulingPage: React.FC = () => {
                     <div
                       key={timeSlot}
                       className={`${
+                        slotDuration === 15 ? 'h-12' : 
+                        slotDuration === 30 ? 'h-20' : 
+                        'h-32'
+                      } border-b border-gray-100 flex items-center px-4 hover:bg-gray-50 transition-colors`}
                         slotDuration === 15 ? 'h-12' : slotDuration === 30 ? 'h-20' : 'h-32'
                       } border-b border-gray-100 flex items-center px-4 hover:bg-gray-50 transition-colors`}
                     >
@@ -1073,7 +1075,7 @@ const SchedulingPage: React.FC = () => {
                       className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
                     />
                     <span className="ml-3 flex items-center">
-                      <Repeat className="h-4 w-4 text-blue-600 mr-2" />
+                      <Calendar className="h-4 w-4 text-blue-600 mr-2" />
                       <span className="font-medium text-blue-900">Consulta Recorrente</span>
                     </span>
                   </label>
@@ -1412,15 +1414,12 @@ const SchedulingPage: React.FC = () => {
         onSuccess={handleEditSuccess}
       />
 
-      {/* Recurring Consultation Modal */}
-      <RecurringConsultationModal
-        isOpen={showRecurringModal}
-        onClose={() => setShowRecurringModal(false)}
-        onSuccess={() => {
-          fetchData();
-          setSuccess("Consultas recorrentes criadas com sucesso!");
-          setTimeout(() => setSuccess(""), 3000);
-        }}
+      {/* Slot Customization Modal */}
+      <SlotCustomizationModal
+        isOpen={showSlotModal}
+        currentSlotDuration={slotDuration}
+        onClose={() => setShowSlotModal(false)}
+        onSlotDurationChange={handleSlotDurationChange}
       />
 
       {/* Slot Customization Modal */}
