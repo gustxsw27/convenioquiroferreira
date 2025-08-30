@@ -22,7 +22,6 @@ import { format, addDays, subDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import EditConsultationModal from "../../components/EditConsultationModal";
 import SlotCustomizationModal from "../../components/SlotCustomizationModal";
-import SlotCustomizationModal from "../../components/SlotCustomizationModal";
 
 type Consultation = {
   id: number;
