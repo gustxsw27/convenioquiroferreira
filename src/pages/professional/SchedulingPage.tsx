@@ -57,8 +57,6 @@ type PrivatePatient = {
 
 type SlotDuration = 15 | 30 | 60;
 
-type SlotDuration = 15 | 30 | 60;
-
 const SchedulingPage: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [consultations, setConsultations] = useState<Consultation[]>([]);
